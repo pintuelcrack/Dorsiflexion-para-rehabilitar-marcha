@@ -17,8 +17,8 @@
 <body>
 
   <header>
-    <h1>Evaluación de Dorsiflexión en la Marcha</h1>
-    <p>Análisis Bioinstrumental del Movimiento Humano - Universidad de Chile</p>
+    <h1>Evaluación Bioinstrumental de Dorsiflexión del Pie</h1>
+    <p>Análisis cuantitativo de la marcha humana - Universidad de Chile</p>
   </header>
 
   <main class="container">
@@ -33,17 +33,44 @@
         <button id="btnWebcam">Usar Cámara Web</button>
         <button id="btnStart" disabled>Iniciar Análisis</button>
         <button id="btnStop" disabled>Detener</button>
+        <button id="btnReset">Reiniciar Datos</button>
       </div>
-      
-      <div class="metrics">
-        <h3>Métricas en Tiempo Real</h3>
-        <p><strong>Ángulo Actual:</strong> <span id="angleValue">0</span>°</p>
-        <p><strong>Dorsiflexión Máxima:</strong> <span id="maxAngleValue">0</span>°</p>
+
+      <!-- Tabla de Métricas y ROM -->
+      <div class="metrics-container">
+        <h3>Tabla de Métricas Cinemáticas</h3>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Valor (° / Grados)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ángulo Actual</strong></td>
+              <td><span id="angleValue">0</span>°</td>
+            </tr>
+            <tr>
+              <td><strong>Dorsiflexión Máx. (Ángulo Mín.)</strong></td>
+              <td><span id="minAngleValue">0</span>°</td>
+            </tr>
+            <tr>
+              <td><strong>Plantiflexión Máx. (Ángulo Máx.)</strong></td>
+              <td><span id="maxAngleValue">0</span>°</td>
+            </tr>
+            <tr class="highlight-row">
+              <td><strong>ROM Total (Rango de Movimiento)</strong></td>
+              <td><span id="romValue">0</span>°</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <!-- Visualización de Video y Pose -->
     <section class="display-panel">
+      <h2>Registro Biomecánico</h2>
       <div class="video-container">
         <video id="inputVideo" playsinline style="display:none;"></video>
         <canvas id="outputCanvas" width="640" height="480"></canvas>
@@ -52,7 +79,7 @@
 
     <!-- Visualización del Gráfico -->
     <section class="chart-panel">
-      <h2>Curva Ángulo vs. Tiempo</h2>
+      <h2>Curva Cinemática (Ángulo vs. Tiempo)</h2>
       <canvas id="angleChart"></canvas>
     </section>
   </main>
