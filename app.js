@@ -15,6 +15,7 @@ const maxAngleValueEl = document.getElementById('maxAngleValue');
 const romValueEl = document.getElementById('romValue');
 
 let isAnalyzing = false;
+let animationFrameId = null;
 let minAngle = Infinity;
 let maxAngle = -Infinity;
 let frameCount = 0;
@@ -26,7 +27,7 @@ const angleChart = new Chart(chartCtx, {
   data: {
     labels: [],
     datasets: [{
-      label: 'Ángulo de Tobillo - Maléolo (°)',
+      label: 'Ángulo de Tobillo (°)',
       data: [],
       borderColor: '#0066cc',
       borderWidth: 2,
@@ -36,6 +37,7 @@ const angleChart = new Chart(chartCtx, {
   },
   options: {
     responsive: true,
+    animation: false,
     scales: {
       x: { title: { display: true, text: 'Cuadros / Frames' } },
       y: { title: { display: true, text: 'Ángulo Articular (°)' }, min: 40, max: 160 }
@@ -53,7 +55,7 @@ function calculateAngle(p1, p2, p3) {
   return Math.round(angle);
 }
 
-// Configurar MediaPipe Pose
+// Configurar MediaPipe Pose con archivos desde CDN estable
 const pose = new Pose({
   locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
 });
@@ -67,58 +69,71 @@ pose.setOptions({
 
 pose.onResults(onResults);
 
-// Procesamiento de cada frame
+// Procesamiento y renderizado de resultados
 function onResults(results) {
   canvasCtx.save();
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+  
+  // Dibujar el fotograma del video en el canvas
+  if (results.image) {
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+  }
 
   if (results.poseLandmarks && isAnalyzing) {
     const landmarks = results.poseLandmarks;
 
     // Puntos Anatómicos Seleccionados:
-    // 25: Rodilla (Dirección de la pierna)
-    // 27: Tobillo / Maléolo Lateral (Vértice)
-    // 31: Punta del pie / Dedos (Brazo distal)
+    // 25: Rodilla, 27: Tobillo (Maléolo), 31: Punta del pie (Dedos)
     const knee = landmarks[25];
-    const ankle = landmarks[27]; // Maléolo
-    const toe = landmarks[31];   // Punta del pie
+    const ankle = landmarks[27];
+    const toe = landmarks[31];
 
-    if (knee && ankle && toe) {
-      // Dibujar las líneas de la articulación del tobillo
+    if (knee && ankle && toe && knee.visibility > 0.3 && ankle.visibility > 0.3) {
+      // Dibujar líneas y articulaciones
       drawConnectors(canvasCtx, landmarks, [[25, 27], [27, 31]], { color: '#00FF00', lineWidth: 4 });
       drawLandmarks(canvasCtx, [knee, ankle, toe], { color: '#FF0000', lineWidth: 3 });
 
-      // Calcular ángulo de dorsiflexión/plantiflexión
+      // Calcular ángulo de dorsiflexión
       const angle = calculateAngle(knee, ankle, toe);
 
-      // Actualizar Valores Mínimos (Dorsiflexión máxima) y Máximos (Plantiflexión máxima)
+      // Actualizar Valores Mínimos y Máximos
       if (angle < minAngle) minAngle = angle;
       if (angle > maxAngle) maxAngle = angle;
 
       const rom = (maxAngle !== -Infinity && minAngle !== Infinity) ? (maxAngle - minAngle) : 0;
 
-      // Actualizar Tabla de Métricas en la Interfaz
+      // Actualizar Tabla de Métricas
       angleValueEl.textContent = angle;
       minAngleValueEl.textContent = minAngle !== Infinity ? minAngle : 0;
       maxAngleValueEl.textContent = maxAngle !== -Infinity ? maxAngle : 0;
       romValueEl.textContent = rom;
 
-      // Actualizar gráfico en tiempo real
+      // Actualizar gráfico
       frameCount++;
       angleChart.data.labels.push(frameCount);
       angleChart.data.datasets[0].data.push(angle);
-      angleChart.update('none');
+      angleChart.update();
     }
   }
   canvasCtx.restore();
+}
+
+// Bucle continuo para enviar fotogramas a MediaPipe
+async function processVideoFrame() {
+  if (isAnalyzing && videoElement.readyState >= 2 && !videoElement.paused && !videoElement.ended) {
+    await pose.send({ image: videoElement });
+  }
+  if (isAnalyzing) {
+    animationFrameId = requestAnimationFrame(processVideoFrame);
+  }
 }
 
 // Controladores de Eventos
 videoUpload.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
-    videoElement.src = URL.createObjectURL(file);
+    const url = URL.createObjectURL(file);
+    videoElement.src = url;
     videoElement.onloadedmetadata = () => {
       canvasElement.width = videoElement.videoWidth || 640;
       canvasElement.height = videoElement.videoHeight || 480;
@@ -128,10 +143,17 @@ videoUpload.addEventListener('change', (e) => {
 });
 
 btnWebcam.addEventListener('click', async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  videoElement.srcObject = stream;
-  videoElement.play();
-  btnStart.disabled = false;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoElement.srcObject = stream;
+    videoElement.onloadedmetadata = () => {
+      canvasElement.width = videoElement.videoWidth || 640;
+      canvasElement.height = videoElement.videoHeight || 480;
+      btnStart.disabled = false;
+    };
+  } catch (err) {
+    alert("No se pudo acceder a la cámara web. Verifica los permisos de tu navegador.");
+  }
 });
 
 btnStart.addEventListener('click', () => {
@@ -139,18 +161,12 @@ btnStart.addEventListener('click', () => {
   btnStart.disabled = true;
   btnStop.disabled = false;
   videoElement.play();
-  
-  async function processFrame() {
-    if (isAnalyzing && !videoElement.paused && !videoElement.ended) {
-      await pose.send({ image: videoElement });
-      requestAnimationFrame(processFrame);
-    }
-  }
-  processFrame();
+  processVideoFrame();
 });
 
 btnStop.addEventListener('click', () => {
   isAnalyzing = false;
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
   videoElement.pause();
   btnStart.disabled = false;
   btnStop.disabled = true;
