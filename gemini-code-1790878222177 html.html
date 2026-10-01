@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Bioinstrumental - Dorsiflexión de Tobillo</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- MediaPipe Pose -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+  <!-- Chart.js para el gráfico -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>Evaluación de Dorsiflexión en la Marcha</h1>
+    <p>Análisis Bioinstrumental del Movimiento Humano - Universidad de Chile</p>
+  </header>
+
+  <main class="container">
+    <!-- Panel de Controles y Selección de Fuente -->
+    <section class="controls-panel">
+      <h2>Controles de Entrada</h2>
+      <div class="input-group">
+        <label for="videoUpload">Cargar archivo de video:</label>
+        <input type="file" id="videoUpload" accept="video/*">
+      </div>
+      <div class="button-group">
+        <button id="btnWebcam">Usar Cámara Web</button>
+        <button id="btnStart" disabled>Iniciar Análisis</button>
+        <button id="btnStop" disabled>Detener</button>
+      </div>
+      
+      <div class="metrics">
+        <h3>Métricas en Tiempo Real</h3>
+        <p><strong>Ángulo Actual:</strong> <span id="angleValue">0</span>°</p>
+        <p><strong>Dorsiflexión Máxima:</strong> <span id="maxAngleValue">0</span>°</p>
+      </div>
+    </section>
+
+    <!-- Visualización de Video y Pose -->
+    <section class="display-panel">
+      <div class="video-container">
+        <video id="inputVideo" playsinline style="display:none;"></video>
+        <canvas id="outputCanvas" width="640" height="480"></canvas>
+      </div>
+    </section>
+
+    <!-- Visualización del Gráfico -->
+    <section class="chart-panel">
+      <h2>Curva Ángulo vs. Tiempo</h2>
+      <canvas id="angleChart"></canvas>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
