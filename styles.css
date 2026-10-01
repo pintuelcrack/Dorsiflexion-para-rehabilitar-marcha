@@ -1,89 +1,31 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Estilos para la Tabla de Métricas */
+.metrics-container {
+  margin-top: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
 }
 
-body {
-  background-color: #f4f7f6;
-  color: #333;
-  padding: 20px;
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.95rem;
 }
 
-header {
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 15px;
+.metrics-table th, .metrics-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.metrics-table th {
   background-color: #003366;
   color: white;
-  border-radius: 8px;
+  font-weight: 600;
 }
 
-.container {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.controls-panel, .display-panel, .chart-panel {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.chart-panel {
-  grid-column: 1 / -1;
-}
-
-.input-group, .button-group {
-  margin-bottom: 20px;
-}
-
-button {
-  background-color: #0066cc;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-right: 5px;
-  margin-top: 5px;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-button:hover:not(:disabled) {
-  background-color: #004c99;
-}
-
-.metrics {
+.highlight-row {
   background-color: #eef5fc;
-  padding: 15px;
-  border-radius: 6px;
-  border-left: 4px solid #0066cc;
-}
-
-.metrics p {
-  font-size: 1.1rem;
-  margin-top: 5px;
-}
-
-.video-container {
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-canvas {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
+  font-weight: bold;
+  color: #0066cc;
 }
